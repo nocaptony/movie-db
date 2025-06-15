@@ -1,21 +1,7 @@
-.App {
-  text-align: center;
-  color: white;
-  background-color: #121212;
-  min-height: 100vh;
-  padding: 2rem;
-}
-
-.search-bar {
+.navbar {
   display: flex;
-  justify-content: center;
   gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-input {
-  padding: 0.5rem;
-  width: 300px;
+  margin-bottom: 1rem;
 }
 
 button {
@@ -23,22 +9,22 @@ button {
   cursor: pointer;
 }
 
+.search-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
 .results {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
+}
+
+.results {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
   justify-content: center;
-}
-
-.movie-card {
-  background: #1e1e1e;
   padding: 1rem;
-  border-radius: 8px;
-  width: 250px;
-  text-align: left;
-}
-
-.movie-card img {
-  width: 100%;
-  border-radius: 6px;
 }

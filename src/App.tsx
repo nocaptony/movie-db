@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { MovieCard } from "./components/MovieCard";
 import "./App.css";
 
@@ -7,92 +7,110 @@ interface Movie {
   title: string;
   overview: string;
   poster_path: string | null;
-  release_date: string;
-  media_type?: string;
 }
 
+type Tab = "home" | "search" | "favorites" | "about";
+
 function App() {
+  const [activeTab, setActiveTab] = useState<Tab>("home");
+  const [query, setQuery] = useState("");
   const [movies, setMovies] = useState<Movie[]>([]);
+  const [favorites, setFavorites] = useState<Movie[]>([]);
 
-  const fetchSameDayReleases = async () => {
-  const today = new Date();
-  const monthDay = today.toISOString().slice(5, 10); // "MM-DD"
+  const handleSearch = async () => {
+    if (!query) return;
 
-  const cached = localStorage.getItem("day_releases");
-  if (cached) {
-    const parsed = JSON.parse(cached);
-    if (parsed.date === monthDay) {
-      setMovies(parsed.movies);
-      return;
-    }
-  }
-
-  try {
     const res = await fetch(
-      `https://api.themoviedb.org/3/discover/movie?api_key=${import.meta.env.VITE_TMDB_API_KEY}&primary_release_date.gte=1950-01-01&primary_release_date.lte=${today.toISOString().split("T")[0]}&sort_by=release_date.desc&page=1`
+      `https://api.themoviedb.org/3/search/movie?api_key=${import.meta.env.VITE_TMDB_API_KEY}&query=${encodeURIComponent(query)}`
     );
-
     const data = await res.json();
+    setMovies(data.results || []);
+  };
 
-    const filteredMovies = (data.results || [])
-      .filter((movie: Movie) => {
-        // Must have a poster
-        if (!movie.poster_path) return false;
-        // Must have a description
-        if (!movie.overview) return false;
+  const handleAddToFavorites = (movie: Movie) => {
+    if (!favorites.find((fav) => fav.id === movie.id)) {
+      setFavorites([...favorites, movie]);
+    }
+  };
 
-        // Must not be a PPV or event
-        const title = movie.title.toLowerCase();
-        const blocklist = ["ufc", "wwe", "mma", "boxing", "ppv", "wrestling"];
-        if (blocklist.some(term => title.includes(term))) return false;
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "home":
+        return <p>🎉 Welcome to TMDB Viewer! Click a tab to get started.</p>;
 
-        // Check if release_date ends with today's MM-DD
-        return movie.release_date?.slice(5) === monthDay;
-      });
+      case "search":
+        return (
+          <>
+            <div className="search-bar">
+              <input
+                type="text"
+                placeholder="Enter movie title..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              />
+              <button onClick={handleSearch}>Search</button>
+            </div>
 
-    localStorage.setItem("day_releases", JSON.stringify({ date: monthDay, movies: filteredMovies }));
-    setMovies(filteredMovies);
-  } catch (err) {
-    console.error("Error fetching same-day movie releases:", err);
-  }
-};
+            <div className="results">
+              {movies.map((movie) => (
+                <MovieCard
+                  key={movie.id}
+                  title={movie.title}
+                  overview={movie.overview}
+                  posterPath={movie.poster_path}
+                >
+                  <button onClick={() => handleAddToFavorites(movie)}>
+                    ❤️ Add to Favorites
+                  </button>
+                </MovieCard>
+              ))}
+            </div>
+          </>
+        );
 
-  useEffect(() => {
-    fetchSameDayReleases();
-  }, []);
+      case "favorites":
+        return (
+          <div className="results">
+            {favorites.length === 0 ? (
+              <p>No favorite movies yet!</p>
+            ) : (
+              favorites.map((movie) => (
+                <MovieCard
+                  key={movie.id}
+                  title={movie.title}
+                  overview={movie.overview}
+                  posterPath={movie.poster_path}
+                />
+              ))
+            )}
+          </div>
+        );
 
-  const todayStr = new Date().toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric"
-  });
+      case "about":
+        return (
+          <div>
+            <h2>About</h2>
+            <p>This app uses the TMDB API to search and list movies.</p>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="App">
-      <h1>🎬 Movies Released on This Day ({todayStr})</h1>
-      <div className="results">
-        {movies.length === 0 ? (
-          <p>No movies released today match your criteria.</p>
-        ) : (
-          movies.map((movie) => (
-            <MovieCard
-              key={movie.id}
-              title={movie.title}
-              overview={movie.overview}
-              posterPath={movie.poster_path}
-            />
-          ))
-        )}
-      </div>
-      <div className="results">
-        {movies.map((movie) => (
-          <MovieCard
-            key={movie.id}
-            title={movie.title}
-            overview={movie.overview}
-            posterPath={movie.poster_path}
-          />
-        ))}
-      </div>
+      <nav className="navbar">
+        <button onClick={() => setActiveTab("home")}>🏠 Home</button>
+        <button onClick={() => setActiveTab("search")}>🔍 Search</button>
+        <button onClick={() => setActiveTab("favorites")}>⭐ Favorites</button>
+        <button onClick={() => setActiveTab("about")}>ℹ️ About</button>
+      </nav>
+
+      <h1>🎬 TMDB Movie App</h1>
+      <div className="tab-content">{renderTabContent()}</div>
     </div>
   );
 }

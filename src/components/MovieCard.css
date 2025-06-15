@@ -1,0 +1,44 @@
+.movie-card {
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 220px;
+  transition: transform 0.2s ease-in-out;
+}
+
+.movie-card:hover {
+  transform: scale(1.03);
+}
+
+.movie-poster {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.movie-details {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.movie-details h3 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+  color: #222;
+}
+
+.movie-details p {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.movie-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 0.5rem;
+}
