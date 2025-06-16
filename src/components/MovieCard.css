@@ -1,7 +1,7 @@
 .movie-card {
   display: flex;
   flex-direction: column;
-  background-color: #ffffff;
+  background-color: #0c0c0f;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -29,12 +29,12 @@
 .movie-details h3 {
   margin: 0 0 8px;
   font-size: 1.1rem;
-  color: #222;
+  color: #e7e6f5;
 }
 
 .movie-details p {
   font-size: 0.9rem;
-  color: #555;
+  color: #c3c0f0;
 }
 
 .movie-actions {

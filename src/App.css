@@ -1,7 +1,13 @@
 .navbar {
   display: flex;
+  justify-content: center;
   gap: 1rem;
-  margin-bottom: 1rem;
+  position: sticky;
+  top: 0;
+  background-color: white;
+  padding: 1rem;
+  z-index: 1000;
+  width: 100%;
 }
 
 button {
@@ -11,14 +17,9 @@ button {
 
 .search-bar {
   display: flex;
+  justify-content: center;
   gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.results {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
+  margin: 1rem 0;
 }
 
 .results {
@@ -27,4 +28,13 @@ button {
   gap: 1.5rem;
   justify-content: center;
   padding: 1rem;
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-top: 80px; /* space for sticky navbar */
+  align-items: center;
+  text-align: center;
 }

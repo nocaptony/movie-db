@@ -12,7 +12,6 @@ export const MovieCard: React.FC<MovieCardProps> = ({
   title,
   overview,
   posterPath,
-  children,
 }) => {
   const imageUrl = posterPath
     ? `https://image.tmdb.org/t/p/w300${posterPath}`
@@ -24,7 +23,6 @@ export const MovieCard: React.FC<MovieCardProps> = ({
       <div className="movie-details">
         <h3>{title}</h3>
         <p>{overview ? overview.slice(0, 100) + "..." : "No description available."}</p>
-        {children && <div className="movie-actions">{children}</div>}
       </div>
     </div>
   );

@@ -15,7 +15,6 @@ function App() {
   const [activeTab, setActiveTab] = useState<Tab>("home");
   const [query, setQuery] = useState("");
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [favorites, setFavorites] = useState<Movie[]>([]);
 
   const handleSearch = async () => {
     if (!query) return;
@@ -25,12 +24,6 @@ function App() {
     );
     const data = await res.json();
     setMovies(data.results || []);
-  };
-
-  const handleAddToFavorites = (movie: Movie) => {
-    if (!favorites.find((fav) => fav.id === movie.id)) {
-      setFavorites([...favorites, movie]);
-    }
   };
 
   const renderTabContent = () => {
@@ -60,31 +53,11 @@ function App() {
                   overview={movie.overview}
                   posterPath={movie.poster_path}
                 >
-                  <button onClick={() => handleAddToFavorites(movie)}>
-                    ❤️ Add to Favorites
-                  </button>
+
                 </MovieCard>
               ))}
             </div>
           </>
-        );
-
-      case "favorites":
-        return (
-          <div className="results">
-            {favorites.length === 0 ? (
-              <p>No favorite movies yet!</p>
-            ) : (
-              favorites.map((movie) => (
-                <MovieCard
-                  key={movie.id}
-                  title={movie.title}
-                  overview={movie.overview}
-                  posterPath={movie.poster_path}
-                />
-              ))
-            )}
-          </div>
         );
 
       case "about":
@@ -105,7 +78,6 @@ function App() {
       <nav className="navbar">
         <button onClick={() => setActiveTab("home")}>🏠 Home</button>
         <button onClick={() => setActiveTab("search")}>🔍 Search</button>
-        <button onClick={() => setActiveTab("favorites")}>⭐ Favorites</button>
         <button onClick={() => setActiveTab("about")}>ℹ️ About</button>
       </nav>
 
