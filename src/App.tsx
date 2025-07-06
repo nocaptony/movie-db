@@ -29,15 +29,26 @@ function App() {
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [movieCast, setMovieCast] = useState<CastMember[]>([]);
   const [loadingCast, setLoadingCast] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
   const handleSearch = async () => {
     if (!query) return;
+    setHasSearched(true);
 
     const res = await fetch(
       `https://api.themoviedb.org/3/search/movie?api_key=${import.meta.env.VITE_TMDB_API_KEY}&query=${encodeURIComponent(query)}`
     );
     const data = await res.json();
-    setMovies(data.results || []);
+
+    const filtered = (data.results || []).filter(
+      (movie: Movie) =>
+        movie.poster_path &&
+        movie.overview &&
+        movie.vote_average > 0 &&
+        movie.vote_average <= 10
+    );
+
+    setMovies(filtered);
   };
 
   const fetchTopRatedByYear = async (year: number) => {
@@ -192,28 +203,34 @@ function App() {
             </div>
 
             <div className="results">
-              {movies.map((movie) => (
-                <MovieCard
-                  key={movie.id}
-                  title={movie.title}
-                  overview={movie.overview}
-                  posterPath={movie.poster_path}
-                  onClick={() => setSelectedMovie(movie)}
-                />
-              ))}
+              {movies.length > 0 ? (
+                movies.map((movie) => (
+                  <MovieCard
+                    key={movie.id}
+                    title={movie.title}
+                    overview={movie.overview}
+                    posterPath={movie.poster_path}
+                    onClick={() => setSelectedMovie(movie)}
+                  />
+                ))
+              ) : hasSearched ? (
+                <div className="text-center">
+                  <p>No movies found. Try a different search.</p>
+                </div>
+              ) : null}
             </div>
           </>
         );
 
       case "about":
         return (
-          <div className="results">
-            <h2>About</h2>
-            <p>
-              TMDB (Tony's Movie Database) is an app created out of my love for
-              movies. Powered by the amazing TMDB API.
-            </p>
-          </div>
+          <div>
+      <h2>About</h2>
+      <p>
+        TMDB (Tony's Movie Database) is an app created out of my love for
+        movies. Powered by the amazing TMDB API.
+      </p>
+    </div>
         );
 
       default:
@@ -224,7 +241,7 @@ function App() {
   return (
     <div className="App">
       <h1>🎬 TMDB Movie App</h1>
-      <nav className="navbar">
+      <nav className="navbar-default">
         <button onClick={() => setActiveTab("home")}>🏠 Home</button>
         <button onClick={() => setActiveTab("search")}>🔍 Search</button>
         <button onClick={() => setActiveTab("about")}>ℹ️ About</button>

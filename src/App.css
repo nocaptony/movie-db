@@ -1,3 +1,9 @@
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+}
+
 .navbar {
   justify-content: center;
 }
@@ -15,16 +21,33 @@ button {
 }
 
 .results {
+  flex: 1;
   display: flex;
   flex-wrap: wrap;
   gap: 1.5rem;
   justify-content: center;
+  align-items: center; 
   padding: 1rem;
+  width: 100%;          
+}
 
+.text-center {
+  text-align: center;
+  width: 100%;
 }
 
 .App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
   text-align: center;
+  width: 100%;
+}
+
+.tab-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-overlay {
@@ -92,4 +115,14 @@ button {
   margin: 2px 0;
   font-size: 0.85rem;
   line-height: 1.1;
+}
+
+.navbar-default {
+  align-items: center;
+}
+
+.about-container {
+  width: 100%;
+  text-align: center;
+  padding: 2rem 1rem;
 }
