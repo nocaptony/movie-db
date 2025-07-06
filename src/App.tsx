@@ -230,6 +230,16 @@ function App() {
         TMDB (Tony's Movie Database) is an app created out of my love for
         movies. Powered by the amazing TMDB API.
       </p>
+      <p>
+        Check out my Letterboxd:{" "}
+        <a
+          href="https://letterboxd.com/tonykallash/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          https://letterboxd.com/tonykallash/
+        </a>
+      </p>
     </div>
         );
 
