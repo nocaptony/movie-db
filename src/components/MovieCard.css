@@ -42,3 +42,43 @@
   display: flex;
   gap: 0.5rem;
 }
+
+@media (max-width: 600px) {
+  .movie-card {
+    width: 85%;
+    max-width: 240px;
+    margin: 0 auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .movie-poster {
+    border-bottom: 1px solid #1a1a1a;
+  }
+
+  .movie-details {
+    padding: 8px;
+  }
+
+  .movie-details h3 {
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+  }
+
+  .movie-details p {
+    font-size: 0.75rem;
+    line-height: 1.2;
+  }
+
+  .movie-actions {
+    margin-top: 8px;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .results {
+    padding: 0.5rem;
+    gap: 1rem;
+    overflow-x: hidden;
+  }
+}

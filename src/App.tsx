@@ -260,7 +260,7 @@ function App() {
         <button onClick={() => setActiveTab("about")}>ℹ️ About</button>
       </nav>
 
-      <div className="tab-content">{renderTabContent()}</div>
+      <div>{renderTabContent()}</div>
 
       {renderModal()}
     </div>
