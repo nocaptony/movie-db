@@ -128,3 +128,9 @@ button {
   text-align: center;
   padding: 2rem 1rem;
 }
+
+.image-size {
+  padding-top: 50px;
+  width: 25%;
+  height: auto;
+}

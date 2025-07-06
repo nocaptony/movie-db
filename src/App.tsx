@@ -240,6 +240,9 @@ function App() {
           https://letterboxd.com/tonykallash/
         </a>
       </p>
+      <p>
+        <img className="image-size" src="/tmdb.png" alt="Description" />
+      </p>
     </div>
         );
 
@@ -250,7 +253,7 @@ function App() {
 
   return (
     <div className="App">
-      <h1>🎬 TMDB Movie App</h1>
+      <h1>Tony's Movie Database</h1>
       <nav className="navbar-default">
         <button onClick={() => setActiveTab("home")}>🏠 Home</button>
         <button onClick={() => setActiveTab("search")}>🔍 Search</button>
