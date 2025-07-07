@@ -2,4 +2,4 @@
 i love movies so i made -
 my own movie website
 
-link in progress
+https://tk-movie-db.netlify.app/
