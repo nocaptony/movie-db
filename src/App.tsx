@@ -143,7 +143,7 @@ function App() {
       return (
         <>
           <div className="year-filter">
-            <p>🏆 Top-Rated Movies of {selectedYear}:</p>
+            <p>Top-Rated Movies of {selectedYear}:</p>
             {renderYearDropdown()}
           </div>
           <div className="results">
@@ -230,9 +230,9 @@ function App() {
     <div className="App">
       <img src="/tmdb-c.png" alt="Tony's Movie Database Logo" className="app-logo" />
       <nav className="navbar-default">
-        <button onClick={() => setActiveTab("home")}>🏠 Home</button>
-        <button onClick={() => setActiveTab("search")}>🔍 Search</button>
-        <button onClick={() => setActiveTab("about")}>ℹ️ About</button>
+        <button onClick={() => setActiveTab("home")}>Home</button>
+        <button onClick={() => setActiveTab("search")}>Search</button>
+        <button onClick={() => setActiveTab("about")}>About</button>
       </nav>
       <div>{renderTabContent()}</div>
       {renderModal()}
