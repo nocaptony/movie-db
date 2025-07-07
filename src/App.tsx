@@ -31,41 +31,29 @@ function App() {
   const [loadingCast, setLoadingCast] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
+  const fetchMovies = async (url: string) => {
+    const res = await fetch(url);
+    const data = await res.json();
+    return (data.results || []).filter((movie: Movie) =>
+      movie.poster_path && movie.overview && movie.vote_average > 0 && movie.vote_average <= 10
+    );
+  };
+
   const handleSearch = async () => {
     if (!query) return;
     setHasSearched(true);
-
-    const res = await fetch(
-      `https://api.themoviedb.org/3/search/movie?api_key=${import.meta.env.VITE_TMDB_API_KEY}&query=${encodeURIComponent(query)}`
-    );
-    const data = await res.json();
-
-    const filtered = (data.results || []).filter(
-      (movie: Movie) =>
-        movie.poster_path &&
-        movie.overview &&
-        movie.vote_average > 0 &&
-        movie.vote_average <= 10
-    );
-
+    const url = `https://api.themoviedb.org/3/search/movie?api_key=${import.meta.env.VITE_TMDB_API_KEY}&query=${encodeURIComponent(query)}`;
+    const filtered = await fetchMovies(url);
     setMovies(filtered);
   };
 
   const fetchTopRatedByYear = async (year: number) => {
     try {
       const allMovies: Movie[] = [];
+      const baseUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${import.meta.env.VITE_TMDB_API_KEY}&primary_release_year=${year}&sort_by=vote_average.desc&vote_count.gte=100&region=US&with_original_language=en&without_genres=99`;
 
       for (let page = 1; page <= 3; page++) {
-        const res = await fetch(
-          `https://api.themoviedb.org/3/discover/movie?api_key=${import.meta.env.VITE_TMDB_API_KEY
-          }&primary_release_year=${year}&sort_by=vote_average.desc&vote_count.gte=100&region=US&with_original_language=en&without_genres=99&page=${page}`
-        );
-        const data = await res.json();
-
-        const filtered = (data.results || []).filter(
-          (movie: Movie) => movie.poster_path && movie.overview
-        );
-
+        const filtered = await fetchMovies(`${baseUrl}&page=${page}`);
         allMovies.push(...filtered);
       }
 
@@ -78,11 +66,9 @@ function App() {
   const fetchMovieCast = async (movieId: number) => {
     setLoadingCast(true);
     try {
-      const res = await fetch(
-        `https://api.themoviedb.org/3/movie/${movieId}/credits?api_key=${import.meta.env.VITE_TMDB_API_KEY}`
-      );
+      const res = await fetch(`https://api.themoviedb.org/3/movie/${movieId}/credits?api_key=${import.meta.env.VITE_TMDB_API_KEY}`);
       const data = await res.json();
-      setMovieCast(data.cast.slice(0, 12));
+      setMovieCast((data.cast || []).slice(0, 12));
     } catch (err) {
       console.error("Failed to fetch movie cast:", err);
       setMovieCast([]);
@@ -95,23 +81,15 @@ function App() {
     fetchTopRatedByYear(selectedYear);
   }, [selectedYear]);
 
-  const renderYearDropdown = () => {
-    const years = [];
-    const currentYear = new Date().getFullYear();
-    for (let y = currentYear; y >= 1940; y--) {
-      years.push(y);
-    }
-
-    return (
-      <select value={selectedYear} onChange={(e) => setSelectedYear(Number(e.target.value))}>
-        {years.map((year) => (
-          <option key={year} value={year}>
-            {year}
-          </option>
-        ))}
-      </select>
-    );
-  };
+  const renderYearDropdown = () => (
+    <select value={selectedYear} onChange={(e) => setSelectedYear(Number(e.target.value))}>
+      {Array.from({ length: new Date().getFullYear() - 1939 }, (_, i) => (
+        <option key={i} value={new Date().getFullYear() - i}>
+          {new Date().getFullYear() - i}
+        </option>
+      ))}
+    </select>
+  );
 
   const closeModal = () => setSelectedMovie(null);
 
@@ -126,9 +104,7 @@ function App() {
       <>
         <div className="modal-overlay" onClick={closeModal}></div>
         <div className="modal-content">
-          <button className="modal-close" onClick={closeModal}>
-            &times;
-          </button>
+          <button className="modal-close" onClick={closeModal}>&times;</button>
           <img className="modal-movie-poster" src={imageUrl} alt={selectedMovie.title} />
           <h2>{selectedMovie.title}</h2>
           <p><strong>Release Date:</strong> {selectedMovie.release_date}</p>
@@ -163,92 +139,91 @@ function App() {
   };
 
   const renderTabContent = () => {
-    switch (activeTab) {
-      case "home":
-        return (
-          <>
-            <div className="year-filter">
-              <p>🏆 Top-Rated Movies of {selectedYear}:</p>
-              {renderYearDropdown()}
-            </div>
-            <div className="results">
-              {topMovies.map((movie) => (
+    if (activeTab === "home") {
+      return (
+        <>
+          <div className="year-filter">
+            <p>🏆 Top-Rated Movies of {selectedYear}:</p>
+            {renderYearDropdown()}
+          </div>
+          <div className="results">
+            {topMovies.map((movie) => (
+              <MovieCard
+                key={movie.id}
+                title={movie.title}
+                overview={movie.overview}
+                posterPath={movie.poster_path}
+                onClick={() => {
+                  setSelectedMovie(movie);
+                  fetchMovieCast(movie.id);
+                }}
+              />
+            ))}
+          </div>
+        </>
+      );
+    }
+
+    if (activeTab === "search") {
+      return (
+        <>
+          <div className="search-bar">
+            <input
+              type="text"
+              placeholder="Enter movie title..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            />
+            <button onClick={handleSearch}>Search</button>
+          </div>
+          <div className="results">
+            {movies.length > 0 ? (
+              movies.map((movie) => (
                 <MovieCard
                   key={movie.id}
                   title={movie.title}
                   overview={movie.overview}
                   posterPath={movie.poster_path}
-                  onClick={() => {
-                    setSelectedMovie(movie);
-                    fetchMovieCast(movie.id);
-                  }}
+                  onClick={() => setSelectedMovie(movie)}
                 />
-              ))}
-            </div>
-          </>
-        );
-
-      case "search":
-        return (
-          <>
-            <div className="search-bar">
-              <input
-                type="text"
-                placeholder="Enter movie title..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              />
-              <button onClick={handleSearch}>Search</button>
-            </div>
-
-            <div className="results">
-              {movies.length > 0 ? (
-                movies.map((movie) => (
-                  <MovieCard
-                    key={movie.id}
-                    title={movie.title}
-                    overview={movie.overview}
-                    posterPath={movie.poster_path}
-                    onClick={() => setSelectedMovie(movie)}
-                  />
-                ))
-              ) : hasSearched ? (
-                <div className="text-center">
-                  <p>No movies found. Try a different search.</p>
-                </div>
-              ) : null}
-            </div>
-          </>
-        );
-
-      case "about":
-        return (
-          <div>
-      <h2>About</h2>
-      <p>
-        TMDB (Tony's Movie Database) is an app created out of my love for
-        movies. Powered by the amazing TMDB API.
-      </p>
-      <p>
-        Check out my Letterboxd:{" "}
-        <a
-          href="https://letterboxd.com/tonykallash/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          https://letterboxd.com/tonykallash/
-        </a>
-      </p>
-      <p>
-        <img className="image-size" src="/tmdb.png" alt="Description" />
-      </p>
-    </div>
-        );
-
-      default:
-        return null;
+              ))
+            ) : hasSearched ? (
+              <div className="text-center">
+                <p>No movies found. Try a different search.</p>
+              </div>
+            ) : null}
+          </div>
+        </>
+      );
     }
+
+    if (activeTab === "about") {
+      return (
+        <div>
+          <h2>About</h2>
+          <p>
+            TMDB (Tony's Movie Database) is an app created out of my love for
+            movies. Powered by the amazing TMDB API.
+          </p>
+          <p>
+            Check out my Letterboxd:{" "}
+            <a
+              href="https://letterboxd.com/tonykallash/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              https://letterboxd.com/tonykallash/
+            </a>
+          </p>
+          <p>
+            <img className="image-size" src="/tmdb.png" alt="Description" />
+          </p>
+        </div>
+      );
+    }
+
+    return null;
   };
 
   return (
@@ -259,9 +234,7 @@ function App() {
         <button onClick={() => setActiveTab("search")}>🔍 Search</button>
         <button onClick={() => setActiveTab("about")}>ℹ️ About</button>
       </nav>
-
       <div>{renderTabContent()}</div>
-
       {renderModal()}
     </div>
   );
