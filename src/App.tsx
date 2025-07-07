@@ -228,7 +228,7 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Tony's Movie Database</h1>
+      <img src="/tmdb-c.png" alt="Tony's Movie Database Logo" className="app-logo" />
       <nav className="navbar-default">
         <button onClick={() => setActiveTab("home")}>🏠 Home</button>
         <button onClick={() => setActiveTab("search")}>🔍 Search</button>

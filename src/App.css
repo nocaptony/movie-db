@@ -42,7 +42,11 @@ button {
 }
 
 .navbar-default {
+  display: flex;
   align-items: center;
+  gap: 0.5rem;
+  text-align: center;
+  justify-content: center;
 }
 
 .search-bar {
@@ -152,6 +156,13 @@ button {
   padding-top: 10px;
   width: 25%;
   height: auto;
+}
+
+.app-logo {
+  width: 300px;
+  height: auto;
+  margin: 1rem auto;
+  padding-bottom: 10px;
 }
 
 /* --- Mobile Styles --- */
