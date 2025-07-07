@@ -50,7 +50,7 @@ function App() {
   const fetchTopRatedByYear = async (year: number) => {
     try {
       const allMovies: Movie[] = [];
-      const baseUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${import.meta.env.VITE_TMDB_API_KEY}&primary_release_year=${year}&sort_by=vote_average.desc&vote_count.gte=100&region=US&with_original_language=en&without_genres=99`;
+      const baseUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${import.meta.env.VITE_TMDB_API_KEY}&primary_release_year=${year}&sort_by=vote_average.desc&vote_count.gte=100&region=US&without_genres=99`;
 
       for (let page = 1; page <= 3; page++) {
         const filtered = await fetchMovies(`${baseUrl}&page=${page}`);
