@@ -18,7 +18,7 @@ interface CastMember {
   profile_path: string | null;
 }
 
-type Tab = "home" | "search" | "about";
+type Tab = "home" | "search" | "random" | "about";
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>("home");
@@ -32,6 +32,8 @@ function App() {
   const [hasSearched, setHasSearched] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState<number | "">("");
   const [genres, setGenres] = useState<{ id: number; name: string }[]>([]);
+  const [randomMovieCount, setRandomMovieCount] = useState<number>(1);
+  const [randomMovies, setRandomMovies] = useState<Movie[]>([]);
 
   const fetchMovies = async (url: string) => {
     const res = await fetch(url);
@@ -124,6 +126,33 @@ function App() {
     </select>
   );
 
+  const fetchRandomMovies = async (count: number) => {
+    try {
+      const movies: Movie[] = [];
+
+      while (movies.length < count) {
+        const randomPage = Math.floor(Math.random() * 50) + 1;
+        const res = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${import.meta.env.VITE_TMDB_API_KEY}&page=${randomPage}`);
+        const data = await res.json();
+
+        const valid = data.results.filter(
+          (m: Movie) =>
+            m.poster_path && m.overview && m.vote_average > 0 && m.vote_average <= 10
+        );
+
+        while (valid.length > 0 && movies.length < count) {
+          const index = Math.floor(Math.random() * valid.length);
+          const selected = valid.splice(index, 1)[0];
+          movies.push(selected);
+        }
+      }
+
+      setRandomMovies(movies);
+    } catch (err) {
+      console.error("Failed to fetch random movies:", err);
+      setRandomMovies([]);
+    }
+  };
   const closeModal = () => setSelectedMovie(null);
 
   const renderModal = () => {
@@ -175,7 +204,7 @@ function App() {
     if (activeTab === "home") {
       return (
         <>
-          <div className="year-filter">
+          <div>
             <p>
               Top-Rated Movies of {renderYearDropdown()} &nbsp;|&nbsp; Genre: {renderMovieGenre()}
             </p>
@@ -232,6 +261,48 @@ function App() {
       );
     }
 
+    if (activeTab === "random") {
+      return (
+        <div className="random-movie">
+          <div style={{ marginBottom: "1rem" }}>
+            <label htmlFor="movie-count">Number of movies: </label>
+            <select
+              id="movie-count"
+              value={randomMovieCount}
+              onChange={(e) => setRandomMovieCount(Number(e.target.value))}
+            >
+              {Array.from({ length: 14 }, (_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  {i + 1}
+                </option>
+              ))}
+            </select>
+            <button onClick={() => fetchRandomMovies(randomMovieCount)} style={{ marginLeft: "1rem" }}>
+              Generate
+            </button>
+          </div>
+          {randomMovies.length > 0 ? (
+            <div className="results">
+              {randomMovies.map((movie) => (
+                <MovieCard
+                  key={movie.id}
+                  title={movie.title}
+                  overview={movie.overview}
+                  posterPath={movie.poster_path}
+                  onClick={() => {
+                    setSelectedMovie(movie);
+                    fetchMovieCast(movie.id);
+                  }}
+                />
+              ))}
+            </div>
+          ) : (
+            <p>Click "Generate" to get random movies!</p>
+          )}
+        </div>
+      );
+    }
+
     if (activeTab === "about") {
       return (
         <div>
@@ -266,6 +337,7 @@ function App() {
       <nav className="navbar-default">
         <button onClick={() => setActiveTab("home")}>Home</button>
         <button onClick={() => setActiveTab("search")}>Search</button>
+        <button onClick={() => setActiveTab("random")}>Random Movie</button>
         <button onClick={() => setActiveTab("about")}>About</button>
       </nav>
       <div>{renderTabContent()}</div>

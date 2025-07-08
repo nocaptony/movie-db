@@ -188,6 +188,10 @@ button {
   padding-bottom: 10px;
 }
 
+.random-movie {
+  padding-top: 10px;
+}
+
 @media (max-width: 600px) {
   .App {
     padding: 1rem;
