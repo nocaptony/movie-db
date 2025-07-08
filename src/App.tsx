@@ -30,6 +30,8 @@ function App() {
   const [movieCast, setMovieCast] = useState<CastMember[]>([]);
   const [loadingCast, setLoadingCast] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [selectedGenre, setSelectedGenre] = useState<number | "">("");
+  const [genres, setGenres] = useState<{ id: number; name: string }[]>([]);
 
   const fetchMovies = async (url: string) => {
     const res = await fetch(url);
@@ -47,10 +49,14 @@ function App() {
     setMovies(filtered);
   };
 
-  const fetchTopRatedByYear = async (year: number) => {
+  const fetchTopRatedByYear = async (year: number, genreId?: number) => {
     try {
       const allMovies: Movie[] = [];
-      const baseUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${import.meta.env.VITE_TMDB_API_KEY}&primary_release_year=${year}&sort_by=vote_average.desc&vote_count.gte=100&region=US&without_genres=99`;
+      let baseUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${import.meta.env.VITE_TMDB_API_KEY}&primary_release_year=${year}&sort_by=vote_average.desc&vote_count.gte=100&region=US&without_genres=99`;
+
+      if (genreId) {
+        baseUrl += `&with_genres=${genreId}`;
+      }
 
       for (let page = 1; page <= 3; page++) {
         const filtered = await fetchMovies(`${baseUrl}&page=${page}`);
@@ -78,14 +84,41 @@ function App() {
   };
 
   useEffect(() => {
-    fetchTopRatedByYear(selectedYear);
-  }, [selectedYear]);
+    fetchTopRatedByYear(selectedYear, selectedGenre || undefined);
+  }, [selectedYear, selectedGenre]);
 
   const renderYearDropdown = () => (
     <select value={selectedYear} onChange={(e) => setSelectedYear(Number(e.target.value))}>
       {Array.from({ length: new Date().getFullYear() - 1939 }, (_, i) => (
         <option key={i} value={new Date().getFullYear() - i}>
           {new Date().getFullYear() - i}
+        </option>
+      ))}
+    </select>
+  );
+
+  useEffect(() => {
+    const fetchGenres = async () => {
+      try {
+        const res = await fetch(
+          `https://api.themoviedb.org/3/genre/movie/list?api_key=${import.meta.env.VITE_TMDB_API_KEY}`
+        );
+        const data = await res.json();
+        setGenres(data.genres || []);
+      } catch (err) {
+        console.error("Failed to fetch genres:", err);
+      }
+    };
+
+    fetchGenres();
+  }, []);
+
+  const renderMovieGenre = () => (
+    <select value={selectedGenre} onChange={(e) => setSelectedGenre(Number(e.target.value))}>
+      <option value="">All Genres</option>
+      {genres.map((genre) => (
+        <option key={genre.id} value={genre.id}>
+          {genre.name}
         </option>
       ))}
     </select>
@@ -143,8 +176,9 @@ function App() {
       return (
         <>
           <div className="year-filter">
-            <p>Top-Rated Movies of {selectedYear}:</p>
-            {renderYearDropdown()}
+            <p>
+              Top-Rated Movies of {renderYearDropdown()} &nbsp;|&nbsp; Genre: {renderMovieGenre()}
+            </p>
           </div>
           <div className="results">
             {topMovies.map((movie) => (
