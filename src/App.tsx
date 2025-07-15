@@ -251,15 +251,17 @@ function App() {
       return (
         <div className="trending-movies">
           <div>
-            <p>Trending Movies: &nbsp;</p>
-            <select
-              id="trending-period"
-              value={trendingPeriod}
-              onChange={(e) => setTrendingPeriod(e.target.value as "day" | "week")}
-            >
-              <option value="day">Today</option>
-              <option value="week">This Week</option>
-            </select>
+            <p>Trending Movies: &nbsp;
+              <select
+                id="trending-period"
+                value={trendingPeriod}
+                onChange={(e) => setTrendingPeriod(e.target.value as "day" | "week")}
+              >
+                <option value="day">Today</option>
+                <option value="week">This Week</option>
+              </select>
+            </p>
+
           </div>
 
           <div className="results">

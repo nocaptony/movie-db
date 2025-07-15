@@ -192,10 +192,6 @@ button {
   padding-top: 10px;
 }
 
-.trending-movies {
-  padding-top: 10px;
-}
-
 @media (max-width: 600px) {
   .App {
     padding: 1rem;
