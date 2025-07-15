@@ -18,7 +18,7 @@ interface CastMember {
   profile_path: string | null;
 }
 
-type Tab = "home" | "search" | "random" | "about";
+type Tab = "home" | "trending" | "search" | "random" | "about";
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>("home");
@@ -34,6 +34,8 @@ function App() {
   const [genres, setGenres] = useState<{ id: number; name: string }[]>([]);
   const [randomMovieCount, setRandomMovieCount] = useState<number>(1);
   const [randomMovies, setRandomMovies] = useState<Movie[]>([]);
+  const [trendingPeriod, setTrendingPeriod] = useState<"day" | "week">("day");
+  const [trendingMovies, setTrendingMovies] = useState<Movie[]>([]);
 
   const fetchMovies = async (url: string) => {
     const res = await fetch(url);
@@ -153,6 +155,24 @@ function App() {
       setRandomMovies([]);
     }
   };
+
+  const fetchTrendingMovies = async (period: "day" | "week" = "day") => {
+    try {
+      const url = `https://api.themoviedb.org/3/trending/movie/${period}?api_key=${import.meta.env.VITE_TMDB_API_KEY}`;
+      const filtered = await fetchMovies(url);
+      setTrendingMovies(filtered);
+    } catch (err) {
+      console.error(`Failed to fetch trending (${period}) movies:`, err);
+      setTrendingMovies([]);
+    }
+  }
+
+  useEffect(() => {
+    if (activeTab === "trending") {
+      fetchTrendingMovies(trendingPeriod);
+    }
+  }, [activeTab, trendingPeriod]);
+
   const closeModal = () => setSelectedMovie(null);
 
   const renderModal = () => {
@@ -227,6 +247,43 @@ function App() {
       );
     }
 
+    if (activeTab === "trending") {
+      return (
+        <div className="trending-movies">
+          <div>
+            <p>Trending Movies: &nbsp;</p>
+            <select
+              id="trending-period"
+              value={trendingPeriod}
+              onChange={(e) => setTrendingPeriod(e.target.value as "day" | "week")}
+            >
+              <option value="day">Today</option>
+              <option value="week">This Week</option>
+            </select>
+          </div>
+
+          <div className="results">
+            {trendingMovies.length > 0 ? (
+              trendingMovies.map((movie) => (
+                <MovieCard
+                  key={movie.id}
+                  title={movie.title}
+                  overview={movie.overview}
+                  posterPath={movie.poster_path}
+                  onClick={() => {
+                    setSelectedMovie(movie);
+                    fetchMovieCast(movie.id);
+                  }}
+                />
+              ))
+            ) : (
+              <p>Loading trending movies...</p>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     if (activeTab === "search") {
       return (
         <>
@@ -264,7 +321,7 @@ function App() {
     if (activeTab === "random") {
       return (
         <div className="random-movie">
-          <div style={{ marginBottom: "1rem" }}>
+          <div>
             <label htmlFor="movie-count">Number of movies: </label>
             <select
               id="movie-count"
@@ -312,16 +369,6 @@ function App() {
             movies. Powered by the amazing TMDB API.
           </p>
           <p>
-            Check out my Letterboxd:{" "}
-            <a
-              href="https://letterboxd.com/tonykallash/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              https://letterboxd.com/tonykallash/
-            </a>
-          </p>
-          <p>
             <img className="image-size" src="/tmdb.png" alt="Description" />
           </p>
         </div>
@@ -336,6 +383,7 @@ function App() {
       <img src="/tmdb-c.png" alt="Tony's Movie Database Logo" className="app-logo" />
       <nav className="navbar-default">
         <button onClick={() => setActiveTab("home")}>Home</button>
+        <button onClick={() => setActiveTab("trending")}>Trending</button>
         <button onClick={() => setActiveTab("search")}>Search</button>
         <button onClick={() => setActiveTab("random")}>Random Movie</button>
         <button onClick={() => setActiveTab("about")}>About</button>
